@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Italy For All – Accessible Travel Map</title>
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+header { background: #003366; color: white; padding: 15px; text-align: center; font-size: 1.4rem; font-weight: bold; }
+#filters { padding: 15px; background: white; display: flex; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid #ddd; }
+#filters label { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
+#map { width: 100%; height: 75vh; }
+.location-list { padding: 15px; background: white; }
+.location-item { padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 0.95rem; }
+</style>
+</head>
+<body>
+<header>Italy For All – Inclusive Tourism, Food & Events Map</header>
+<section id="filters">
+<label><input type="checkbox" class="filter" value="wheelchair"> Wheelchair Accessible</label>
+<label><input type="checkbox" class="filter" value="braille"> Braille Available</label>
+<label><input type="checkbox" class="filter" value="blind"> Blind-Friendly</label>
+<label><input type="checkbox" class="filter" value="senior"> Senior-Friendly</label>
+<label><input type="checkbox" class="filter" value="low-mobility"> Low Mobility Access</label>
+</section>
+<div id="map"></div>
+<div class="location-list" id="locationList"></div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Initialize Map
+var map = L.map("map").setView([41.9028, 12.4964], 6); // Italy center
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+
+// Sample Locations
+const locations = [
+  { name: "Colosseum – Rome", coords: [41.8902, 12.4922], accessibility: ["wheelchair", "senior"] },
+  { name: "Turin Egyptian Museum", coords: [45.0686, 7.6845], accessibility: ["wheelchair", "braille", "blind"] },
+  { name: "Florence Cathedral", coords: [43.7731, 11.2556], accessibility: ["low-mobility", "senior"] },
+  { name: "Venice Vaporetto Line 1", coords: [45.4408, 12.3155], accessibility: ["wheelchair"] }
+];
+
+// Render Map & Filters
+let markers = [];
+function renderMap() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  const activeFilters = [...document.querySelectorAll(".filter:checked")].map(el => el.value);
+  const listContainer = document.getElementById("locationList");
+  listContainer.innerHTML = "";
+
+  locations.forEach(loc => {
+    if (activeFilters.length > 0 && !activeFilters.every(f => loc.accessibility.includes(f))) return;
+    const marker = L.marker(loc.coords).addTo(map).bindPopup('<b>' + loc.name + '</b>');
+    markers.push(marker);
+
+    const item = document.createElement("div");
+    item.className = "location-item";
+    item.textContent = loc.name + ' – Accessibility: ' + loc.accessibility.join(", ");
+    listContainer.appendChild(item);
+  });
+}
+
+// Event Listeners
+document.querySelectorAll(".filter").forEach(filter => filter.addEventListener("change", renderMap));
+
+// Initial Render
+renderMap();
+</script>
+</body>
+</html>
