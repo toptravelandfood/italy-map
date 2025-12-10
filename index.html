@@ -3,70 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Italy For All – Accessible Travel Map</title>
-<!-- Leaflet CSS -->
+<title>Italy For All – Advanced Accessible Travel Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
 body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
-header { background: #003366; color: white; padding: 15px; text-align: center; font-size: 1.4rem; font-weight: bold; }
-#filters { padding: 15px; background: white; display: flex; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid #ddd; }
-#filters label { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
-#map { width: 100%; height: 75vh; }
-.location-list { padding: 15px; background: white; }
-.location-item { padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 0.95rem; }
+header { background: #003366; color: white; padding: 15px; text-align: center; font-size: 1.5rem; font-weight: bold; }
+#filters { padding: 15px; background: white; display: flex; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid #ddd; justify-content: center; }
+#filters label { display: flex; align-items: center; gap: 5px; font-size: 0.95rem; }
+#map { width: 100%; height: 70vh; }
+.location-list { padding: 15px; background: white; max-height: 300px; overflow-y: auto; border-top: 1px solid #ddd; }
+.location-item { padding: 10px 0; border-bottom: 1px solid #ddd; cursor: pointer; }
+.location-item:hover { background-color: #f0f0f0; }
+.reset-btn { background: #003366; color: white; padding: 5px 12px; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px; }
+.popup-img { width: 100%; max-width: 200px; border-radius: 5px; margin-bottom: 5px; }
 </style>
 </head>
 <body>
-<header>Italy For All – Inclusive Tourism, Food & Events Map</header>
+<header>Italy For All – Advanced Accessible Travel Map</header>
+
 <section id="filters">
-<label><input type="checkbox" class="filter" value="wheelchair"> Wheelchair Accessible</label>
-<label><input type="checkbox" class="filter" value="braille"> Braille Available</label>
-<label><input type="checkbox" class="filter" value="blind"> Blind-Friendly</label>
-<label><input type="checkbox" class="filter" value="senior"> Senior-Friendly</label>
-<label><input type="checkbox" class="filter" value="low-mobility"> Low Mobility Access</label>
+<label><input type="checkbox" class="filter-access" value="wheelchair"> Wheelchair Accessible</label>
+<label><input type="checkbox" class="filter-access" value="braille"> Braille Available</label>
+<label><input type="checkbox" class="filter-access" value="blind"> Blind-Friendly</label>
+<label><input type="checkbox" class="filter-access" value="senior"> Senior-Friendly</label>
+<label><input type="checkbox" class="filter-access" value="low-mobility"> Low Mobility Access</label>
+
+<label><input type="checkbox" class="filter-type" value="monument"> Monument</label>
+<label><input type="checkbox" class="filter-type" value="restaurant"> Restaurant</label>
+<label><input type="checkbox" class="filter-type" value="event"> Event</label>
+
+<button class="reset-btn" id="resetFilters">Reset Filters</button>
 </section>
+
 <div id="map"></div>
 <div class="location-list" id="locationList"></div>
-<!-- Leaflet JS -->
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
 // Initialize Map
-var map = L.map("map").setView([41.9028, 12.4964], 6); // Italy center
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+var map = L.map('map').setView([41.9028, 12.4964], 6);
+
+// Base Layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
 // Sample Locations
 const locations = [
-  { name: "Colosseum – Rome", coords: [41.8902, 12.4922], accessibility: ["wheelchair", "senior"] },
-  { name: "Turin Egyptian Museum", coords: [45.0686, 7.6845], accessibility: ["wheelchair", "braille", "blind"] },
-  { name: "Florence Cathedral", coords: [43.7731, 11.2556], accessibility: ["low-mobility", "senior"] },
-  { name: "Venice Vaporetto Line 1", coords: [45.4408, 12.3155], accessibility: ["wheelchair"] }
+  {
+    name: "Colosseum",
+    coords: [41.8902, 12.4922],
+    accessibility: ["wheelchair", "senior"],
+    type: "monument",
+    city: "Rome",
+    address: "Piazza del Colosseo, 1",
+    hours: "08:30–19:00",
+    price: "16€",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/320px-Colosseo_2020.jpg",
+    link: "https://goo.gl/maps/1bLhjX5oKZ72"
+  },
+  {
+    name: "Turin Egyptian Museum",
+    coords: [45.0686, 7.6845],
+    accessibility: ["wheelchair", "braille", "blind"],
+    type: "monument",
+    city: "Turin",
+    address: "Via Accademia delle Scienze, 6",
+    hours: "09:00–18:30",
+    price: "15€",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Museo_Egizio_Torino_01.jpg/320px-Museo_Egizio_Torino_01.jpg",
+    link: "https://goo.gl/maps/2b7fXJbqQq22"
+  },
+  {
+    name: "Florence Cathedral",
+    coords: [43.7731, 11.2556],
+    accessibility: ["low-mobility", "senior"],
+    type: "monument",
+    city: "Florence",
+    address: "Piazza del Duomo, 50122",
+    hours: "10:00–17:00",
+    price: "Free entry",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Cattedrale_di_Santa_Maria_del_Fiore.jpg/320px-Cattedrale_di_Santa_Maria_del_Fiore.jpg",
+    link: "https://goo.gl/maps/3cLhJx5JHkM2"
+  },
+  {
+    name: "Venice Vaporetto Line 1",
+    coords: [45.4408, 12.3155],
+    accessibility: ["wheelchair"],
+    type: "event",
+    city: "Venice",
+    address: "Canal Grande",
+    hours: "All day",
+    price: "7.50€ per ride",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Vaporetto_Venice.jpg/320px-Vaporetto_Venice.jpg",
+    link: "https://goo.gl/maps/4f7kL1eXHjP2"
+  }
 ];
 
-// Render Map & Filters
-let markers = [];
+// Marker cluster
+var markers = L.markerClusterGroup();
+var mapMarkers = [];
+
+// Render Map
 function renderMap() {
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-  const activeFilters = [...document.querySelectorAll(".filter:checked")].map(el => el.value);
-  const listContainer = document.getElementById("locationList");
-  listContainer.innerHTML = "";
+  markers.clearLayers();
+  const listContainer = document.getElementById('locationList');
+  listContainer.innerHTML = '';
+
+  const activeAccess = [...document.querySelectorAll(".filter-access:checked")].map(e => e.value);
+  const activeType = [...document.querySelectorAll(".filter-type:checked")].map(e => e.value);
 
   locations.forEach(loc => {
-    if (activeFilters.length > 0 && !activeFilters.every(f => loc.accessibility.includes(f))) return;
-    const marker = L.marker(loc.coords).addTo(map).bindPopup('<b>' + loc.name + '</b>');
-    markers.push(marker);
+    if (activeAccess.length > 0 && !activeAccess.every(f => loc.accessibility.includes(f))) return;
+    if (activeType.length > 0 && !activeType.includes(loc.type)) return;
 
-    const item = document.createElement("div");
-    item.className = "location-item";
-    item.textContent = loc.name + ' – Accessibility: ' + loc.accessibility.join(", ");
+    // Popup HTML
+    const popupHTML = `
+      <div style="text-align:center;">
+        <img src="${loc.img}" class="popup-img" alt="${loc.name}">
+        <h3>${loc.name}</h3>
+        <p><b>Type:</b> ${loc.type.charAt(0).toUpperCase() + loc.type.slice(1)}</p>
+        <p><b>City:</b> ${loc.city}</p>
+        <p><b>Address:</b> ${loc.address}</p>
+        <p><b>Hours:</b> ${loc.hours}</p>
+        <p><b>Price:</b> ${loc.price}</p>
+        <p><b>Accessibility:</b> ${loc.accessibility.join(", ")}</p>
+        <a href="${loc.link}" target="_blank">View on Google Maps</a>
+      </div>
+    `;
+
+    const marker = L.marker(loc.coords).bindPopup(popupHTML);
+    markers.addLayer(marker);
+
+    // Add to list
+    const item = document.createElement('div');
+    item.className = 'location-item';
+    item.innerHTML = `<b>${loc.name}</b> – ${loc.city} (${loc.type})`;
+    item.addEventListener('click', () => {
+      map.setView(loc.coords, 15);
+      marker.openPopup();
+    });
     listContainer.appendChild(item);
   });
+
+  map.addLayer(markers);
 }
 
 // Event Listeners
-document.querySelectorAll(".filter").forEach(filter => filter.addEventListener("change", renderMap));
+document.querySelectorAll(".filter-access, .filter-type").forEach(f => f.addEventListener("change", renderMap));
+document.getElementById("resetFilters").addEventListener("click", () => {
+  document.querySelectorAll(".filter-access, .filter-type").forEach(f => f.checked = false);
+  renderMap();
+});
 
-// Initial Render
+// Initial render
 renderMap();
 </script>
 </body>
