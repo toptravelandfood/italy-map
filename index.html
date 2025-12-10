@@ -3,36 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Italy For All – Advanced Accessible Travel Map</title>
+<title>Italy For All – Pro Accessible Travel Map</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
-body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+body { margin:0; font-family: Arial, sans-serif; background: #f5f5f5; }
 header { background: #003366; color: white; padding: 15px; text-align: center; font-size: 1.5rem; font-weight: bold; }
 #filters { padding: 15px; background: white; display: flex; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid #ddd; justify-content: center; }
 #filters label { display: flex; align-items: center; gap: 5px; font-size: 0.95rem; }
+#filters .reset-btn { background: #003366; color: white; padding: 5px 12px; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px; }
 #map { width: 100%; height: 70vh; }
 .location-list { padding: 15px; background: white; max-height: 300px; overflow-y: auto; border-top: 1px solid #ddd; }
 .location-item { padding: 10px 0; border-bottom: 1px solid #ddd; cursor: pointer; }
 .location-item:hover { background-color: #f0f0f0; }
-.reset-btn { background: #003366; color: white; padding: 5px 12px; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px; }
 .popup-img { width: 100%; max-width: 200px; border-radius: 5px; margin-bottom: 5px; }
 </style>
 </head>
 <body>
-<header>Italy For All – Advanced Accessible Travel Map</header>
+<header>Italy For All – Pro Accessible Travel Map</header>
 
 <section id="filters">
-<label><input type="checkbox" class="filter-access" value="wheelchair"> Wheelchair Accessible</label>
-<label><input type="checkbox" class="filter-access" value="braille"> Braille Available</label>
+<!-- Accessibility Filters -->
+<label><input type="checkbox" class="filter-access" value="wheelchair"> Wheelchair</label>
+<label><input type="checkbox" class="filter-access" value="braille"> Braille</label>
 <label><input type="checkbox" class="filter-access" value="blind"> Blind-Friendly</label>
 <label><input type="checkbox" class="filter-access" value="senior"> Senior-Friendly</label>
-<label><input type="checkbox" class="filter-access" value="low-mobility"> Low Mobility Access</label>
+<label><input type="checkbox" class="filter-access" value="low-mobility"> Low Mobility</label>
 
+<!-- Type Filters -->
 <label><input type="checkbox" class="filter-type" value="monument"> Monument</label>
 <label><input type="checkbox" class="filter-type" value="restaurant"> Restaurant</label>
 <label><input type="checkbox" class="filter-type" value="event"> Event</label>
+
+<!-- Tag Filters -->
+<label><input type="checkbox" class="filter-tag" value="vegan"> Vegan-Friendly</label>
 
 <button class="reset-btn" id="resetFilters">Reset Filters</button>
 </section>
@@ -45,8 +50,6 @@ header { background: #003366; color: white; padding: 15px; text-align: center; f
 <script>
 // Initialize Map
 var map = L.map('map').setView([41.9028, 12.4964], 6);
-
-// Base Layer
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
 // Sample Locations
@@ -60,8 +63,8 @@ const locations = [
     address: "Piazza del Colosseo, 1",
     hours: "08:30–19:00",
     price: "16€",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/320px-Colosseo_2020.jpg",
-    link: "https://goo.gl/maps/1bLhjX5oKZ72"
+    tags: ["vegan"],
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/320px-Colosseo_2020.jpg"
   },
   {
     name: "Turin Egyptian Museum",
@@ -72,8 +75,8 @@ const locations = [
     address: "Via Accademia delle Scienze, 6",
     hours: "09:00–18:30",
     price: "15€",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Museo_Egizio_Torino_01.jpg/320px-Museo_Egizio_Torino_01.jpg",
-    link: "https://goo.gl/maps/2b7fXJbqQq22"
+    tags: [],
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Museo_Egizio_Torino_01.jpg/320px-Museo_Egizio_Torino_01.jpg"
   },
   {
     name: "Florence Cathedral",
@@ -84,8 +87,8 @@ const locations = [
     address: "Piazza del Duomo, 50122",
     hours: "10:00–17:00",
     price: "Free entry",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Cattedrale_di_Santa_Maria_del_Fiore.jpg/320px-Cattedrale_di_Santa_Maria_del_Fiore.jpg",
-    link: "https://goo.gl/maps/3cLhJx5JHkM2"
+    tags: ["vegan"],
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Cattedrale_di_Santa_Maria_del_Fiore.jpg/320px-Cattedrale_di_Santa_Maria_del_Fiore.jpg"
   },
   {
     name: "Venice Vaporetto Line 1",
@@ -96,14 +99,23 @@ const locations = [
     address: "Canal Grande",
     hours: "All day",
     price: "7.50€ per ride",
-    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Vaporetto_Venice.jpg/320px-Vaporetto_Venice.jpg",
-    link: "https://goo.gl/maps/4f7kL1eXHjP2"
+    tags: [],
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Vaporetto_Venice.jpg/320px-Vaporetto_Venice.jpg"
   }
 ];
 
-// Marker cluster
+// Marker Cluster
 var markers = L.markerClusterGroup();
 var mapMarkers = [];
+
+// Icon by type
+function getIcon(type) {
+  let iconUrl = "";
+  if(type==="monument") iconUrl="https://cdn-icons-png.flaticon.com/512/684/684908.png";
+  if(type==="restaurant") iconUrl="https://cdn-icons-png.flaticon.com/512/3075/3075977.png";
+  if(type==="event") iconUrl="https://cdn-icons-png.flaticon.com/512/854/854878.png";
+  return L.icon({ iconUrl, iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-30] });
+}
 
 // Render Map
 function renderMap() {
@@ -111,39 +123,41 @@ function renderMap() {
   const listContainer = document.getElementById('locationList');
   listContainer.innerHTML = '';
 
-  const activeAccess = [...document.querySelectorAll(".filter-access:checked")].map(e => e.value);
-  const activeType = [...document.querySelectorAll(".filter-type:checked")].map(e => e.value);
+  const activeAccess = [...document.querySelectorAll(".filter-access:checked")].map(e=>e.value);
+  const activeType = [...document.querySelectorAll(".filter-type:checked")].map(e=>e.value);
+  const activeTag = [...document.querySelectorAll(".filter-tag:checked")].map(e=>e.value);
 
-  locations.forEach(loc => {
-    if (activeAccess.length > 0 && !activeAccess.every(f => loc.accessibility.includes(f))) return;
-    if (activeType.length > 0 && !activeType.includes(loc.type)) return;
+  locations.forEach(loc=>{
+    if(activeAccess.length>0 && !activeAccess.every(f=>loc.accessibility.includes(f))) return;
+    if(activeType.length>0 && !activeType.includes(loc.type)) return;
+    if(activeTag.length>0 && !activeTag.every(f=>loc.tags.includes(f))) return;
 
-    // Popup HTML
     const popupHTML = `
       <div style="text-align:center;">
         <img src="${loc.img}" class="popup-img" alt="${loc.name}">
         <h3>${loc.name}</h3>
-        <p><b>Type:</b> ${loc.type.charAt(0).toUpperCase() + loc.type.slice(1)}</p>
+        <p><b>Type:</b> ${loc.type.charAt(0).toUpperCase()+loc.type.slice(1)}</p>
         <p><b>City:</b> ${loc.city}</p>
         <p><b>Address:</b> ${loc.address}</p>
         <p><b>Hours:</b> ${loc.hours}</p>
         <p><b>Price:</b> ${loc.price}</p>
         <p><b>Accessibility:</b> ${loc.accessibility.join(", ")}</p>
-        <a href="${loc.link}" target="_blank">View on Google Maps</a>
+        <p><b>Tags:</b> ${loc.tags.join(", ")}</p>
       </div>
     `;
 
-    const marker = L.marker(loc.coords).bindPopup(popupHTML);
+    const marker = L.marker(loc.coords,{icon:getIcon(loc.type)}).bindPopup(popupHTML);
     markers.addLayer(marker);
 
-    // Add to list
     const item = document.createElement('div');
-    item.className = 'location-item';
-    item.innerHTML = `<b>${loc.name}</b> – ${loc.city} (${loc.type})`;
-    item.addEventListener('click', () => {
-      map.setView(loc.coords, 15);
+    item.className='location-item';
+    item.innerHTML=`<b>${loc.name}</b> – ${loc.city} (${loc.type})`;
+    item.addEventListener('click', ()=>{
+      map.setView(loc.coords,15);
       marker.openPopup();
     });
+    item.addEventListener('mouseenter', ()=>marker.openPopup());
+    item.addEventListener('mouseleave', ()=>marker.closePopup());
     listContainer.appendChild(item);
   });
 
@@ -151,9 +165,9 @@ function renderMap() {
 }
 
 // Event Listeners
-document.querySelectorAll(".filter-access, .filter-type").forEach(f => f.addEventListener("change", renderMap));
-document.getElementById("resetFilters").addEventListener("click", () => {
-  document.querySelectorAll(".filter-access, .filter-type").forEach(f => f.checked = false);
+document.querySelectorAll(".filter-access, .filter-type, .filter-tag").forEach(f=>f.addEventListener("change", renderMap));
+document.getElementById("resetFilters").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-access, .filter-type, .filter-tag").forEach(f=>f.checked=false);
   renderMap();
 });
 
