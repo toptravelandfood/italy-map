@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@1.0.0/Control.FullScreen.css"/>
 
 <style>
 body { margin: 0; font-family: Arial, sans-serif; }
@@ -21,12 +22,6 @@ header { background:#003366; color:white; padding:15px; text-align:center; font-
 #filters label { display:flex; align-items:center; gap:5px; font-size:0.9rem; cursor:pointer; }
 .leaflet-control-fullscreen { background-color: white; border-radius:4px; padding:4px; }
 </style>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script src="https://unpkg.com/leaflet.fullscreen@1.0.0/Control.FullScreen.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@1.0.0/Control.FullScreen.css"/>
 </head>
 
 <body>
@@ -48,14 +43,6 @@ header { background:#003366; color:white; padding:15px; text-align:center; font-
 <div id="map"></div>
 <div id="sidebar"></div>
 
-<script>
-// --------------------------- INITIALIZE MAP ---------------------------
-var map = L.map('map').setView([41.9028,12.4964], 6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(map);
-L.control.fullscreen().addTo(map);
-
-// --------------------------- HOTELS DATA ---------------------------
-const hotels = [
-  // Example: {name, coords, img, bullets, link, cert, type, region}
-  // Lote 1 (10)
-  {name:"Aleph Rome Hotel
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markerclus
